@@ -1,4 +1,4 @@
-import { Star, Clock, RotateCcw, Package } from 'lucide-react'
+import { Star, Clock, RotateCcw, Package, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const ProductCard = ({ product }) => {
@@ -33,6 +33,14 @@ const ProductCard = ({ product }) => {
         <h3 className="text-sm font-medium text-gray-900 leading-tight mb-3">
           {truncateTitle(product.title)}
         </h3>
+
+        {/* Vendor Information */}
+        {product.vendor && (
+          <div className="flex items-center text-xs text-gray-600 mb-2">
+            <User className="w-3 h-3 mr-1" />
+            <span>Vendor: {product.vendor.vendor_name}</span>
+          </div>
+        )}
 
         {/* Price and Stock */}
         <div className="flex items-center justify-between mb-3">
