@@ -12,6 +12,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 function App() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
+  const [platforms, setPlatforms] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [filtersLoading, setFiltersLoading] = useState(false)
@@ -27,33 +28,41 @@ function App() {
       setLoading(true)
       setError(null)
       
-      // Fetch categories and products from backend API
-      const [categoriesResponse, productsResponse] = await Promise.all([
+      // Fetch categories, products, and platforms from backend API
+      const [categoriesResponse, productsResponse, platformsResponse] = await Promise.all([
         fetch(`${API_BASE_URL}/api/categories`),
-        fetch(`${API_BASE_URL}/api/products`)
+        fetch(`${API_BASE_URL}/api/products`),
+        fetch(`${API_BASE_URL}/api/platforms`)
       ])
 
-      if (!categoriesResponse.ok || !productsResponse.ok) {
-        throw new Error('Failed to fetch data from server')
+      if (!categoriesResponse.ok || !productsResponse.ok || !platformsResponse.ok) {
+        throw new Error("Failed to fetch data from server")
       }
 
       const categoriesData = await categoriesResponse.json()
       const productsData = await productsResponse.json()
+      const platformsData = await platformsResponse.json()
 
       if (categoriesData.success) {
         setCategories(categoriesData.data)
       } else {
-        throw new Error('Failed to load categories')
+        throw new Error("Failed to load categories")
       }
 
       if (productsData.success) {
         setProducts(productsData.data)
         setFilteredProducts(productsData.data)
       } else {
-        throw new Error('Failed to load products')
+        throw new Error("Failed to load products")
+      }
+
+      if (platformsData.success) {
+        setPlatforms(platformsData.data)
+      } else {
+        throw new Error("Failed to load platforms")
       }
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error("Error fetching data:", error)
       setError(error.message)
       
       // Fallback to mock data if API fails
@@ -106,10 +115,22 @@ function App() {
           category: { name: "Instagram Softreg" }
         }
       ]
+
+      const mockPlatforms = [
+        { id: 1, name: "Facebook Accounts" },
+        { id: 2, name: "Instagram Accounts" },
+        { id: 3, name: "Game Accounts" },
+        { id: 4, name: "Discord Accounts" },
+        { id: 5, name: "Twitter Accounts" },
+        { id: 6, name: "YouTube Accounts" },
+        { id: 7, name: "TikTok Accounts" },
+        { id: 8, name: "LinkedIn Accounts" }
+      ]
       
       setCategories(mockCategories)
       setProducts(mockProducts)
       setFilteredProducts(mockProducts)
+      setPlatforms(mockPlatforms)
     } finally {
       setLoading(false)
     }
