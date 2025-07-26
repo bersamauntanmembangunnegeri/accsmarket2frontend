@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import Header from './components/Header'
 import CategorySection from './components/CategorySection'
 import ProductFilters from './components/ProductFilters'
@@ -21,7 +22,29 @@ function App() {
 
   useEffect(() => {
     fetchData()
+    // Check URL parameters on page load
+    checkUrlParameters()
   }, [])
+
+  const checkUrlParameters = () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const filters = {}
+    
+    if (urlParams.get('platform')) {
+      filters.platform = urlParams.get('platform')
+    }
+    if (urlParams.get('category')) {
+      filters.category = urlParams.get('category')
+    }
+    if (urlParams.get('vendor')) {
+      filters.vendor = urlParams.get('vendor')
+    }
+    
+    if (Object.keys(filters).length > 0) {
+      setActiveFilters(filters)
+      handleFiltersChange(filters)
+    }
+  }
 
   const fetchData = async () => {
     try {
@@ -363,77 +386,74 @@ function App() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Browse by Platform</h3>
                 <div className="flex flex-wrap justify-center gap-3">
                   {platforms.map(platform => (
-                    <button
+                    <a
                       key={platform.id}
-                      onClick={() => handleQuickFilter({ platform: platform.name })}
+                      href={`/?platform=${encodeURIComponent(platform.name)}`}
                       className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                     >
                       {platform.name}
-                    </button>
+                    </a>
                   ))}
                   {/* Static platform links as fallback */}
                   {platforms.length === 0 && (
                     <>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'Facebook Accounts' })}
+                      <a
+                        href="/?platform=Facebook%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Facebook Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'Instagram Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=Instagram%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Instagram Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'Game Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=Game%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Game Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'Discord Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=Discord%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Discord Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'Twitter Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=Twitter%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Twitter Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'YouTube Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=YouTube%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         YouTube Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'TikTok Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=TikTok%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         TikTok Accounts
-                      </button>
-                      <button
-                        onClick={() => handleQuickFilter({ platform: 'LinkedIn Accounts' })}
+                      </a>
+                      <a
+                        href="/?platform=LinkedIn%20Accounts"
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         LinkedIn Accounts
-                      </button>
+                      </a>
                     </>
                   )}
                   {/* Clear filters button */}
-                  <button
-                    onClick={() => {
-                      setActiveFilters({})
-                      setFilteredProducts(products)
-                    }}
+                  <a
+                    href="/"
                     className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 rounded-lg transition-colors duration-200 border border-red-200 hover:border-red-300 font-medium"
                   >
                     Clear Filters
-                  </button>
+                  </a>
                 </div>
               </div>
 

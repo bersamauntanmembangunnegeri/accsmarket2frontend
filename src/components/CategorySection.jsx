@@ -39,49 +39,29 @@ const CategorySection = ({ category, products, onFilterChange }) => {
 
   const { platform, categoryName } = getCategoryParts()
 
-  const handlePlatformClick = () => {
-    console.log('Platform clicked:', platform, 'onFilterChange:', typeof onFilterChange)
-    if (onFilterChange) {
-      console.log('Calling onFilterChange with platform:', platform)
-      onFilterChange({ platform: platform })
-    } else {
-      console.error('onFilterChange is not available')
-    }
-  }
-
-  const handleCategoryClick = () => {
-    console.log('Category clicked:', categoryName, 'onFilterChange:', typeof onFilterChange)
-    if (onFilterChange) {
-      console.log('Calling onFilterChange with category:', categoryName)
-      onFilterChange({ category: categoryName })
-    } else {
-      console.error('onFilterChange is not available')
-    }
-  }
-
   return (
     <section className="mb-8">
       {/* Category Header - Table Style with Clickable Parts */}
       <div className="bg-gray-700 text-white px-4 py-3 rounded-t-lg">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">
-            <span 
+            <a 
+              href={`/?platform=${encodeURIComponent(platform)}`}
               className="cursor-pointer hover:text-blue-300 transition-colors border-b border-transparent hover:border-blue-300"
-              onClick={handlePlatformClick}
               title={`Filter by ${platform}`}
             >
               {platform}
-            </span>
+            </a>
             {categoryName && (
               <>
                 <span className="mx-2">-</span>
-                <span 
+                <a 
+                  href={`/?category=${encodeURIComponent(categoryName)}`}
                   className="cursor-pointer hover:text-green-300 transition-colors border-b border-transparent hover:border-green-300"
-                  onClick={handleCategoryClick}
                   title={`Filter by ${categoryName}`}
                 >
                   {categoryName}
-                </span>
+                </a>
               </>
             )}
           </h2>
