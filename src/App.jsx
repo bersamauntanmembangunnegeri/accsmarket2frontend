@@ -170,7 +170,7 @@ function App() {
       setActiveFilters(filters)
       
       console.log('Filtering with filters:', filters)
-      console.log('Available products:', products)
+      console.log('Available products (before API call):', products)
       
       // Build query parameters
       const params = new URLSearchParams()
@@ -184,10 +184,13 @@ function App() {
       // Update URL with new filters
       const newUrl = `${window.location.pathname}?${params.toString()}`
       window.history.pushState({ path: newUrl }, '', newUrl)
+      console.log('URL updated to:', newUrl)
       
       // Try to fetch filtered products from API first
       try {
-        const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
+        const apiUrl = `${API_BASE_URL}/api/products?${params.toString()}`
+        console.log('Fetching from API:', apiUrl)
+        const response = await fetch(apiUrl)
         
         if (response.ok) {
           const data = await response.json()
@@ -204,24 +207,30 @@ function App() {
       // If API fails, fall back to client-side filtering
       console.warn('Using client-side filtering')
       const filtered = products.filter(product => {
-        console.log('Filtering product:', product.title)
+        console.log('Checking product:', product.title)
         
         if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
+          console.log('Keyword mismatch')
           return false
         }
         if (filters.category_id && filters.category_id !== 'all' && product.category_id !== parseInt(filters.category_id)) {
+          console.log('Category ID mismatch')
           return false
         }
         if (filters.min_price && product.price < parseFloat(filters.min_price)) {
+          console.log('Min price mismatch')
           return false
         }
         if (filters.max_price && product.price > parseFloat(filters.max_price)) {
+          console.log('Max price mismatch')
           return false
         }
         if (filters.min_quantity && product.stock_quantity < parseInt(filters.min_quantity)) {
+          console.log('Min quantity mismatch')
           return false
         }
         if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
+          console.log('Max quantity mismatch')
           return false
         }
         
@@ -262,6 +271,7 @@ function App() {
           console.log(`Platform match result: ${platformMatch}`)
           
           if (!platformMatch) {
+            console.log('Platform mismatch')
             return false
           }
         }
@@ -270,6 +280,7 @@ function App() {
         if (filters.category) {
           const categoryName = product.category?.name || product.account_type || ''
           if (!categoryName.toLowerCase().includes(filters.category.toLowerCase())) {
+            console.log('Category mismatch')
             return false
           }
         }
@@ -277,13 +288,14 @@ function App() {
         if (filters.vendor) {
           const vendorName = product.vendor?.vendor_name || product.vendor || ''
           if (!vendorName.toLowerCase().includes(filters.vendor.toLowerCase())) {
+            console.log('Vendor mismatch')
             return false
           }
         }
         return true
       })
       
-      console.log('Filtered products:', filtered)
+      console.log('Filtered products (client-side):', filtered)
       setFilteredProducts(filtered)
     } catch (error) {
       console.error('Error filtering products:', error)
@@ -298,7 +310,7 @@ function App() {
   const handleQuickFilter = (filterType) => {
     console.log('handleQuickFilter called with:', filterType)
     const newFilters = { ...activeFilters, ...filterType }
-    console.log('New filters:', newFilters)
+    console.log('New filters (from quick filter):', newFilters)
     handleFiltersChange(newFilters)
   }
 
@@ -398,118 +410,34 @@ function App() {
                     <a
                       key={platform.id}
                       onClick={() => handleQuickFilter({ platform: platform.name })}
-                      className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 cursor-pointer"
                     >
                       {platform.name}
                     </a>
                   ))}
-                  {/* Static platform links as fallback */}
-                  {platforms.length === 0 && (
-                    <>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'Facebook Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        Facebook Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'Instagram Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        Instagram Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'Game Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        Game Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'Discord Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        Discord Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'Twitter Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        Twitter Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'YouTube Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        YouTube Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'TikTok Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        TikTok Accounts
-                      </a>
-                      <a
-                        onClick={() => handleQuickFilter({ platform: 'LinkedIn Accounts' })}
-                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
-                      >
-                        LinkedIn Accounts
-                      </a>
-                    </>
-                  )}
-                  {/* Clear filters button */}
-                  <a
-                    href="/"
-                    className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 rounded-lg transition-colors duration-200 border border-red-200 hover:border-red-300 font-medium"
-                  >
-                    Clear Filters
-                  </a>
                 </div>
               </div>
 
               {/* Product Filters */}
-              <ProductFilters 
-                onFiltersChange={handleFiltersChange}
-                isLoading={filtersLoading}
-              />
+              <ProductFilters onFiltersChange={handleFiltersChange} isLoading={filtersLoading} />
 
-              {/* Loading indicator for filters */}
-              {filtersLoading && (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Filtering products...</p>
-                </div>
-              )}
-
-              {/* Categories and Products */}
-              <div className="space-y-8">
+              {/* Product Listing */}
+              <div className="space-y-6">
                 {categories.map(category => {
-                  const categoryProducts = getCategoryWithProducts(category)
-                  if (categoryProducts.length === 0) return null
-                  
-                  return (
-                    <CategorySection
-                      key={category.id}
-                      category={category}
-                      products={categoryProducts}
+                  const productsInCategory = getCategoryWithProducts(category)
+                  return productsInCategory.length > 0 && (
+                    <CategorySection 
+                      key={category.id} 
+                      category={category} 
+                      products={productsInCategory}
                       onFilterChange={handleQuickFilter}
                     />
                   )
                 })}
               </div>
-
-              {/* No Products Message */}
-              {filteredProducts.length === 0 && !filtersLoading && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">
-                    {hasActiveFilters 
-                      ? 'No products match your current filters. Try adjusting your search criteria.'
-                      : 'No products available at the moment.'
-                    }
-                  </p>
-                </div>
-              )}
             </main>
-          } />
+          }
+          />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
 
@@ -520,4 +448,5 @@ function App() {
 }
 
 export default App
+
 
