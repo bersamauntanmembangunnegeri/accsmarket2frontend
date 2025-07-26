@@ -141,6 +141,9 @@ function App() {
       setFiltersLoading(true)
       setActiveFilters(filters)
       
+      console.log('Filtering with filters:', filters)
+      console.log('Available products:', products)
+      
       // Build query parameters
       const params = new URLSearchParams()
       
@@ -150,20 +153,27 @@ function App() {
         }
       })
       
-      // Try to fetch filtered products from API
-      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
-      
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          setFilteredProducts(data.data)
-          return
+      // Try to fetch filtered products from API first
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            console.log('API filtering successful, products:', data.data)
+            setFilteredProducts(data.data)
+            return
+          }
         }
+      } catch (apiError) {
+        console.warn('API filtering failed:', apiError)
       }
       
       // If API fails, fall back to client-side filtering
-      console.warn('API filtering failed, using client-side filtering')
+      console.warn('Using client-side filtering')
       const filtered = products.filter(product => {
+        console.log('Filtering product:', product.title)
+        
         if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
           return false
         }
@@ -182,14 +192,48 @@ function App() {
         if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
           return false
         }
-        // Handle platform filtering
+        
+        // Handle platform filtering - improved logic
         if (filters.platform) {
-          const categoryName = product.category?.name || product.account_type || ''
-          const platformMatch = categoryName.toLowerCase().includes(filters.platform.toLowerCase().replace(' accounts', ''))
+          const platformFilter = filters.platform.toLowerCase()
+          const productTitle = product.title.toLowerCase()
+          const categoryName = (product.category?.name || product.account_type || '').toLowerCase()
+          
+          console.log(`Platform filter: ${platformFilter}`)
+          console.log(`Product title: ${productTitle}`)
+          console.log(`Category name: ${categoryName}`)
+          
+          // Check if the platform matches the product
+          let platformMatch = false
+          
+          if (platformFilter.includes('facebook')) {
+            platformMatch = productTitle.includes('fb ') || productTitle.includes('facebook') || categoryName.includes('facebook')
+          } else if (platformFilter.includes('instagram')) {
+            platformMatch = productTitle.includes('ig ') || productTitle.includes('instagram') || categoryName.includes('instagram')
+          } else if (platformFilter.includes('game')) {
+            platformMatch = productTitle.includes('game') || categoryName.includes('game') || 
+                           productTitle.includes('black desert') || productTitle.includes('brawl stars') || 
+                           productTitle.includes('call of duty') || productTitle.includes('clash') ||
+                           productTitle.includes('genshin') || productTitle.includes('epicgames')
+          } else if (platformFilter.includes('discord')) {
+            platformMatch = productTitle.includes('discord') || categoryName.includes('discord')
+          } else if (platformFilter.includes('twitter')) {
+            platformMatch = productTitle.includes('twitter') || categoryName.includes('twitter')
+          } else if (platformFilter.includes('youtube')) {
+            platformMatch = productTitle.includes('youtube') || categoryName.includes('youtube')
+          } else if (platformFilter.includes('tiktok')) {
+            platformMatch = productTitle.includes('tiktok') || categoryName.includes('tiktok')
+          } else if (platformFilter.includes('linkedin')) {
+            platformMatch = productTitle.includes('linkedin') || categoryName.includes('linkedin')
+          }
+          
+          console.log(`Platform match result: ${platformMatch}`)
+          
           if (!platformMatch) {
             return false
           }
         }
+        
         // Handle category filtering
         if (filters.category) {
           const categoryName = product.category?.name || product.account_type || ''
@@ -206,54 +250,13 @@ function App() {
         }
         return true
       })
+      
+      console.log('Filtered products:', filtered)
       setFilteredProducts(filtered)
     } catch (error) {
       console.error('Error filtering products:', error)
-      // Fallback to client-side filtering on any error
-      const filtered = products.filter(product => {
-        if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
-          return false
-        }
-        if (filters.category_id && filters.category_id !== 'all' && product.category_id !== parseInt(filters.category_id)) {
-          return false
-        }
-        if (filters.min_price && product.price < parseFloat(filters.min_price)) {
-          return false
-        }
-        if (filters.max_price && product.price > parseFloat(filters.max_price)) {
-          return false
-        }
-        if (filters.min_quantity && product.stock_quantity < parseInt(filters.min_quantity)) {
-          return false
-        }
-        if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
-          return false
-        }
-        // Handle platform filtering
-        if (filters.platform) {
-          const categoryName = product.category?.name || product.account_type || ''
-          const platformMatch = categoryName.toLowerCase().includes(filters.platform.toLowerCase().replace(' accounts', ''))
-          if (!platformMatch) {
-            return false
-          }
-        }
-        // Handle category filtering
-        if (filters.category) {
-          const categoryName = product.category?.name || product.account_type || ''
-          if (!categoryName.toLowerCase().includes(filters.category.toLowerCase())) {
-            return false
-          }
-        }
-        // Handle vendor filtering
-        if (filters.vendor) {
-          const vendorName = product.vendor?.vendor_name || product.vendor || ''
-          if (!vendorName.toLowerCase().includes(filters.vendor.toLowerCase())) {
-            return false
-          }
-        }
-        return true
-      })
-      setFilteredProducts(filtered)
+      // On any error, just show all products
+      setFilteredProducts(products)
     } finally {
       setFiltersLoading(false)
     }
