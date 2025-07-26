@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import CategorySection from './components/CategorySection'
 import ProductFilters from './components/ProductFilters'
+import CategoryBreadcrumb from './components/CategoryBreadcrumb'
+import SubcategoryFilter from './components/SubcategoryFilter'
 import Footer from './components/Footer'
 import AdminPage from './pages/AdminPage'
 import './App.css'
@@ -297,7 +299,30 @@ function App() {
   // New function to handle quick filters from category headers and vendor clicks
   const handleQuickFilter = (filterType) => {
     console.log('handleQuickFilter called with:', filterType)
-    const newFilters = { ...activeFilters, ...filterType }
+    
+    // Map platform filters to category filters for proper component rendering
+    let newFilters = { ...activeFilters }
+    
+    if (filterType.platform) {
+      // Map platform name to category name
+      const platformToCategory = {
+        'Facebook Accounts': 'Facebook Accounts',
+        'Instagram Accounts': 'Instagram Accounts',
+        'Game Accounts': 'Game Accounts',
+        'Discord Accounts': 'Discord Accounts',
+        'Twitter Accounts': 'Twitter Accounts',
+        'YouTube Accounts': 'YouTube Accounts',
+        'TikTok Accounts': 'TikTok Accounts',
+        'LinkedIn Accounts': 'LinkedIn Accounts'
+      }
+      
+      newFilters.platform = filterType.platform
+      newFilters.category = platformToCategory[filterType.platform] || filterType.platform
+    } else {
+      // Handle other filter types
+      newFilters = { ...newFilters, ...filterType }
+    }
+    
     console.log('New filters (from quick filter):', newFilters)
     handleFiltersChange(newFilters)
   }
@@ -408,6 +433,24 @@ function App() {
 
               {/* Product Filters */}
               <ProductFilters onFiltersChange={handleFiltersChange} isLoading={filtersLoading} />
+
+              {/* Category Breadcrumb */}
+              {(activeFilters.category || activeFilters.subcategory) && (
+                <CategoryBreadcrumb 
+                  category={activeFilters.category ? { name: activeFilters.category } : null}
+                  subcategory={activeFilters.subcategory ? { name: activeFilters.subcategory } : null}
+                  onFilterChange={handleQuickFilter}
+                />
+              )}
+
+              {/* Subcategory Filter */}
+              {activeFilters.category && (
+                <SubcategoryFilter 
+                  category={categories.find(cat => cat.name === activeFilters.category)}
+                  activeSubcategory={activeFilters.subcategory}
+                  onFilterChange={handleQuickFilter}
+                />
+              )}
 
               {/* Product Listing */}
               <div className="space-y-6">
