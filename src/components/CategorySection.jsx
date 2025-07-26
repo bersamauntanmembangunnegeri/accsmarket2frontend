@@ -1,13 +1,81 @@
 import ProductCard from './ProductCard'
 
-const CategorySection = ({ category, products }) => {
+const CategorySection = ({ category, products, onFilterChange }) => {
+  // Extract platform and category from category name
+  const getCategoryParts = () => {
+    const categoryName = category.name || ''
+    
+    // Split by common patterns like "Game Accounts Black Desert Mobile"
+    if (categoryName.includes('Game Accounts')) {
+      return {
+        platform: 'Game Accounts',
+        categoryName: categoryName.replace('Game Accounts ', '').trim()
+      }
+    } else if (categoryName.includes('Facebook')) {
+      return {
+        platform: 'Facebook Accounts',
+        categoryName: categoryName.replace('Facebook ', '').trim()
+      }
+    } else if (categoryName.includes('Instagram')) {
+      return {
+        platform: 'Instagram Accounts', 
+        categoryName: categoryName.replace('Instagram ', '').trim()
+      }
+    } else {
+      // Default fallback
+      const parts = categoryName.split(' ')
+      if (parts.length > 2) {
+        return {
+          platform: `${parts[0]} ${parts[1]}`,
+          categoryName: parts.slice(2).join(' ')
+        }
+      }
+      return {
+        platform: categoryName,
+        categoryName: ''
+      }
+    }
+  }
+
+  const { platform, categoryName } = getCategoryParts()
+
+  const handlePlatformClick = () => {
+    if (onFilterChange) {
+      onFilterChange({ platform: platform })
+    }
+  }
+
+  const handleCategoryClick = () => {
+    if (onFilterChange) {
+      onFilterChange({ category: categoryName })
+    }
+  }
+
   return (
     <section className="mb-8">
-      {/* Category Header - Table Style */}
+      {/* Category Header - Table Style with Clickable Parts */}
       <div className="bg-gray-700 text-white px-4 py-3 rounded-t-lg">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">
-            {category.name}
+            <span 
+              className="cursor-pointer hover:text-blue-300 transition-colors border-b border-transparent hover:border-blue-300"
+              onClick={handlePlatformClick}
+              title={`Filter by ${platform}`}
+            >
+              {platform}
+            </span>
+            {categoryName && (
+              <>
+                <span className="mx-2">-</span>
+                <span 
+                  className="cursor-pointer hover:text-green-300 transition-colors border-b border-transparent hover:border-green-300"
+                  onClick={handleCategoryClick}
+                  title={`Filter by ${categoryName}`}
+                >
+                  {categoryName}
+                </span>
+              </>
+            )}
           </h2>
           <div className="flex gap-8 text-sm">
             <span>In stock</span>
@@ -26,6 +94,7 @@ const CategorySection = ({ category, products }) => {
             key={product.id} 
             product={product} 
             isLast={index === products.length - 1}
+            onFilterChange={onFilterChange}
           />
         ))}
       </div>

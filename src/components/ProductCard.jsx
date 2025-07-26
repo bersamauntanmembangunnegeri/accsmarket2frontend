@@ -1,7 +1,7 @@
 import { Star, Clock, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
-const ProductCard = ({ product, isLast }) => {
+const ProductCard = ({ product, isLast, onFilterChange }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -46,6 +46,27 @@ const ProductCard = ({ product, isLast }) => {
     }
   }
 
+  const handleVendorClick = () => {
+    if (onFilterChange && product.vendor) {
+      onFilterChange({ vendor: product.vendor.vendor_name || product.vendor })
+    }
+  }
+
+  // Get vendor name from different possible sources
+  const getVendorName = () => {
+    if (product.vendor?.vendor_name) {
+      return product.vendor.vendor_name
+    } else if (product.vendor) {
+      return product.vendor
+    } else {
+      // Generate a mock vendor name for demo purposes
+      const vendors = ['Future Systems', 'Global Tech', 'Innovate Solutions']
+      return vendors[product.id % vendors.length]
+    }
+  }
+
+  const vendorName = getVendorName()
+
   return (
     <div className={`p-4 ${!isLast ? 'border-b border-gray-200' : ''} hover:bg-gray-50 transition-colors`}>
       <div className="flex items-start gap-4">
@@ -60,6 +81,18 @@ const ProductCard = ({ product, isLast }) => {
           <p className="text-sm text-gray-900 leading-relaxed mb-2">
             {truncateTitle(product.title)}
           </p>
+
+          {/* Vendor Name - Clickable */}
+          <div className="mb-2">
+            <span className="text-xs text-gray-600">Vendor: </span>
+            <span 
+              className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 hover:underline transition-colors"
+              onClick={handleVendorClick}
+              title={`Filter by vendor: ${vendorName}`}
+            >
+              {vendorName}
+            </span>
+          </div>
 
           {/* Stats Row */}
           <div className="flex items-center gap-4 text-xs text-gray-600">

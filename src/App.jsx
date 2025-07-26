@@ -160,12 +160,39 @@ function App() {
         if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
           return false
         }
+        // Handle platform filtering
+        if (filters.platform) {
+          const categoryName = product.category?.name || product.account_type || ''
+          if (!categoryName.toLowerCase().includes(filters.platform.toLowerCase())) {
+            return false
+          }
+        }
+        // Handle category filtering
+        if (filters.category) {
+          const categoryName = product.category?.name || product.account_type || ''
+          if (!categoryName.toLowerCase().includes(filters.category.toLowerCase())) {
+            return false
+          }
+        }
+        // Handle vendor filtering
+        if (filters.vendor) {
+          const vendorName = product.vendor?.vendor_name || product.vendor || ''
+          if (!vendorName.toLowerCase().includes(filters.vendor.toLowerCase())) {
+            return false
+          }
+        }
         return true
       })
       setFilteredProducts(filtered)
     } finally {
       setFiltersLoading(false)
     }
+  }
+
+  // New function to handle quick filters from category headers and vendor clicks
+  const handleQuickFilter = (filterType) => {
+    const newFilters = { ...activeFilters, ...filterType }
+    handleFiltersChange(newFilters)
   }
 
   const getCategoryWithProducts = (category) => {
@@ -281,6 +308,7 @@ function App() {
                       key={category.id}
                       category={category}
                       products={categoryProducts}
+                      onFilterChange={handleQuickFilter}
                     />
                   )
                 })}
