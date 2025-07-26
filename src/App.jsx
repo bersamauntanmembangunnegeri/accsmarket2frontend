@@ -180,9 +180,8 @@ function App() {
       setActiveFilters(filters)
       
       console.log('Filtering with filters:', filters)
-      console.log('Available products (before API call):', products)
       
-      // Build query parameters
+      // Build query parameters for API call
       const params = new URLSearchParams()
       
       Object.entries(filters).forEach(([key, value]) => {
@@ -196,103 +195,23 @@ function App() {
       window.history.pushState({ path: newUrl }, '', newUrl)
       console.log('URL updated to:', newUrl)
       
-      // Use client-side filtering only
-      console.warn('Using client-side filtering')
-      const filtered = products.filter(product => {
-        console.log('Checking product:', product.title)
-        
-        if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
-          console.log('Keyword mismatch')
-          return false
-        }
-        if (filters.category_id && filters.category_id !== 'all' && product.category_id !== parseInt(filters.category_id)) {
-          console.log('Category ID mismatch')
-          return false
-        }
-        if (filters.min_price && product.price < parseFloat(filters.min_price)) {
-          console.log('Min price mismatch')
-          return false
-        }
-        if (filters.max_price && product.price > parseFloat(filters.max_price)) {
-          console.log('Max price mismatch')
-          return false
-        }
-        if (filters.min_quantity && product.stock_quantity < parseInt(filters.min_quantity)) {
-          console.log('Min quantity mismatch')
-          return false
-        }
-        if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
-          console.log('Max quantity mismatch')
-          return false
-        }
-        
-        // Handle platform filtering - improved logic
-        if (filters.platform) {
-          const platformFilter = filters.platform.toLowerCase()
-          const productTitle = product.title.toLowerCase()
-          const categoryName = (product.category?.name || product.account_type || '').toLowerCase()
-          
-          console.log(`Platform filter: ${platformFilter}`)
-          console.log(`Product title: ${productTitle}`)
-          console.log(`Category name: ${categoryName}`)
-          
-          // Check if the platform matches the product
-          let platformMatch = false
-          
-          if (platformFilter.includes('facebook')) {
-            platformMatch = productTitle.includes('fb ') || productTitle.includes('facebook') || categoryName.includes('facebook')
-          } else if (platformFilter.includes('instagram')) {
-            platformMatch = productTitle.includes('ig ') || productTitle.includes('instagram') || categoryName.includes('instagram')
-          } else if (platformFilter.includes('game')) {
-            platformMatch = productTitle.includes('game') || categoryName.includes('game') || 
-                           productTitle.includes('black desert') || productTitle.includes('brawl stars') || 
-                           productTitle.includes('call of duty') || productTitle.includes('clash') ||
-                           productTitle.includes('genshin') || productTitle.includes('epicgames')
-          } else if (platformFilter.includes('discord')) {
-            platformMatch = productTitle.includes('discord') || categoryName.includes('discord')
-          } else if (platformFilter.includes('twitter')) {
-            platformMatch = productTitle.includes('twitter') || categoryName.includes('twitter')
-          } else if (platformFilter.includes('youtube')) {
-            platformMatch = productTitle.includes('youtube') || categoryName.includes('youtube')
-          } else if (platformFilter.includes('tiktok')) {
-            platformMatch = productTitle.includes('tiktok') || categoryName.includes('tiktok')
-          } else if (platformFilter.includes('linkedin')) {
-            platformMatch = productTitle.includes('linkedin') || categoryName.includes('linkedin')
-          }
-          
-          console.log(`Platform match result: ${platformMatch}`)
-          
-          if (!platformMatch) {
-            console.log('Platform mismatch')
-            return false
-          }
-        }
-        
-        // Handle category filtering
-        if (filters.category) {
-          const categoryName = product.category?.name || product.account_type || ''
-          if (!categoryName.toLowerCase().includes(filters.category.toLowerCase())) {
-            console.log('Category mismatch')
-            return false
-          }
-        }
-        // Handle vendor filtering
-        if (filters.vendor) {
-          const vendorName = product.vendor?.vendor_name || product.vendor || ''
-          if (!vendorName.toLowerCase().includes(filters.vendor.toLowerCase())) {
-            console.log('Vendor mismatch')
-            return false
-          }
-        }
-        return true
-      })
+      // Make API call to backend with filters
+      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch filtered products from server")
+      }
+      const data = await response.json()
       
-      console.log('Filtered products (client-side):', filtered)
-      setFilteredProducts(filtered)
+      if (data.success) {
+        setFilteredProducts(data.data)
+        setProducts(data.data) // Update main products state as well
+      } else {
+        throw new Error(data.message || "Failed to filter products")
+      }
     } catch (error) {
       console.error('Error filtering products:', error)
-      // On any error, just show all products
-      setFilteredProducts(products)
+      setError(error.message)
+      setFilteredProducts([]) // Clear products on error
     } finally {
       setFiltersLoading(false)
     }
@@ -347,7 +266,7 @@ function App() {
       setSelectedPlatform(null)
       setSelectedCategory(null)
       setActiveFilters({})
-      setFilteredProducts(products)
+      fetchData() // Re-fetch all data when navigating to home
       window.history.pushState({ path: '/' }, '', '/')
     } else if (type === 'platform') {
       setSelectedPlatform(data)
@@ -363,7 +282,7 @@ function App() {
     setSelectedPlatform(null)
     setSelectedCategory(null)
     setActiveFilters({})
-    setFilteredProducts(products)
+    fetchData() // Re-fetch all data when clearing filters
     window.history.pushState({ path: '/' }, '', '/')
   }
 
@@ -422,51 +341,46 @@ function App() {
 
               {/* Welcome Section */}
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                  Buy or Sell Social Media Accounts
-                </h1>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Your trusted marketplace for high-quality, verified social media accounts. 
-                  Browse our extensive collection of Facebook, Instagram, and other platform accounts.
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Buy or Sell Social Media Accounts</h1>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  Your trusted marketplace for high-quality, verified social media accounts. Browse our
+                  extensive collection of Facebook, Instagram, and other platform accounts.
                 </p>
               </div>
 
               {/* Stats Section */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {filteredProducts.length}+
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {hasActiveFilters ? 'Filtered Results' : 'Products Available'}
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center border">
+                  <p className="text-green-600 text-3xl font-bold">2+</p>
+                  <p className="text-gray-500">Products Available</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                  <div className="text-2xl font-bold text-blue-600">24/7</div>
-                  <div className="text-sm text-gray-600">Support</div>
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center border">
+                  <p className="text-blue-600 text-3xl font-bold">24/7</p>
+                  <p className="text-gray-500">Support</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                  <div className="text-2xl font-bold text-purple-600">100%</div>
-                  <div className="text-sm text-gray-600">Secure</div>
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center border">
+                  <p className="text-purple-600 text-3xl font-bold">100%</p>
+                  <p className="text-gray-500">Secure</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm text-center">
-                  <div className="text-2xl font-bold text-orange-600">Fast</div>
-                  <div className="text-sm text-gray-600">Delivery</div>
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center border">
+                  <p className="text-orange-600 text-3xl font-bold">Fast</p>
+                  <p className="text-gray-500">Delivery</p>
                 </div>
               </div>
 
-              {/* Platform Links Section */}
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Browse by Platform</h3>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {platforms.map(platform => (
-                    <a
-                      key={platform.id}
-                      onClick={() => handleQuickFilter({ platform: platform.name })}
-                      className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 cursor-pointer"
+              {/* Browse by Platform Section */}
+              <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Browse by Platform</h2>
+                <div className="flex flex-wrap gap-3">
+                  {platforms.map((platform) => (
+                    <Button
+                      key={platform.platform_id}
+                      variant="outline"
+                      className="rounded-full px-4 py-2 text-sm"
+                      onClick={() => handleNavigate('platform', platform.platform_name)}
                     >
-                      {platform.name}
-                    </a>
+                      {platform.platform_name}
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -474,38 +388,46 @@ function App() {
               {/* Product Filters */}
               <ProductFilters onFiltersChange={handleFiltersChange} isLoading={filtersLoading} />
 
-              {/* Platform Breadcrumb */}
-              <PlatformBreadcrumb 
-                selectedPlatform={selectedPlatform}
-                selectedCategory={selectedCategory}
-                onNavigate={handleNavigate}
-              />
-
-              {/* Category Filter */}
-              <CategoryFilter 
-                selectedPlatform={selectedPlatform}
-                selectedCategory={selectedCategory}
-                onCategorySelect={handleCategorySelect}
-                onClearFilters={handleClearFilters}
-              />
+              {/* Breadcrumbs */}
+              {(selectedPlatform || selectedCategory || hasActiveFilters) && (
+                <div className="mb-6 flex items-center space-x-2 text-sm text-gray-500">
+                  <span className="cursor-pointer hover:text-gray-700" onClick={() => handleNavigate('home')}>Home</span>
+                  <span className="mx-1">/</span>
+                  {selectedPlatform && (
+                    <>
+                      <PlatformBreadcrumb platformName={selectedPlatform} />
+                      <span className="mx-1">/</span>
+                    </>
+                  )}
+                  {selectedCategory && (
+                    <>
+                      <CategoryBreadcrumb categoryName={selectedCategory.category_name} />
+                      <span className="mx-1">/</span>
+                    </>
+                  )}
+                  {hasActiveFilters && (
+                    <span className="text-gray-700">Filtered Results</span>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={handleClearFilters} className="ml-auto text-red-500 hover:bg-red-50 hover:text-red-600">
+                    Clear All Filters
+                  </Button>
+                </div>
+              )}
 
               {/* Product Listing */}
-              <div className="space-y-6">
-                {categories.map(category => {
-                  const productsInCategory = getCategoryWithProducts(category)
-                  return productsInCategory.length > 0 && (
-                    <CategorySection 
-                      key={category.id} 
-                      category={category} 
-                      products={productsInCategory}
-                      onFilterChange={handleQuickFilter}
-                    />
-                  )
-                })}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10">
+                    <p className="text-gray-500">No products found matching your criteria.</p>
+                  </div>
+                )}
               </div>
             </main>
-          }
-          />
+          } />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
 

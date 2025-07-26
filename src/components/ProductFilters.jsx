@@ -103,11 +103,7 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value }
     setFilters(newFilters)
-    
-    // Apply filters immediately for keyword search
-    if (key === 'keyword') {
-      onFiltersChange(newFilters)
-    }
+    onFiltersChange(newFilters) // Trigger filter change for all filter types
   }
 
   const applyFilters = () => {
@@ -319,4 +315,6 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
 }
 
 export default ProductFilters
+
+
 
