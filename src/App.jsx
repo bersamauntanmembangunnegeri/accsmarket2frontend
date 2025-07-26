@@ -334,6 +334,85 @@ function App() {
                 </div>
               </div>
 
+              {/* Platform Links Section */}
+              <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Browse by Platform</h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {platforms.map(platform => (
+                    <button
+                      key={platform.id}
+                      onClick={() => handleQuickFilter({ platform: platform.name })}
+                      className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                    >
+                      {platform.name}
+                    </button>
+                  ))}
+                  {/* Static platform links as fallback */}
+                  {platforms.length === 0 && (
+                    <>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'Facebook Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        Facebook Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'Instagram Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        Instagram Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'Game Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        Game Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'Discord Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        Discord Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'Twitter Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        Twitter Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'YouTube Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        YouTube Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'TikTok Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        TikTok Accounts
+                      </button>
+                      <button
+                        onClick={() => handleQuickFilter({ platform: 'LinkedIn Accounts' })}
+                        className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
+                      >
+                        LinkedIn Accounts
+                      </button>
+                    </>
+                  )}
+                  {/* Clear filters button */}
+                  <button
+                    onClick={() => {
+                      setActiveFilters({})
+                      setFilteredProducts(products)
+                    }}
+                    className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 hover:text-red-800 rounded-lg transition-colors duration-200 border border-red-200 hover:border-red-300 font-medium"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+
               {/* Product Filters */}
               <ProductFilters 
                 onFiltersChange={handleFiltersChange}
