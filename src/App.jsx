@@ -240,7 +240,9 @@ function App() {
 
   // New function to handle quick filters from category headers and vendor clicks
   const handleQuickFilter = (filterType) => {
+    console.log('handleQuickFilter called with:', filterType)
     const newFilters = { ...activeFilters, ...filterType }
+    console.log('New filters:', newFilters)
     handleFiltersChange(newFilters)
   }
 

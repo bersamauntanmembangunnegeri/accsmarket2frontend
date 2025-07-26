@@ -40,14 +40,22 @@ const CategorySection = ({ category, products, onFilterChange }) => {
   const { platform, categoryName } = getCategoryParts()
 
   const handlePlatformClick = () => {
+    console.log('Platform clicked:', platform, 'onFilterChange:', typeof onFilterChange)
     if (onFilterChange) {
+      console.log('Calling onFilterChange with platform:', platform)
       onFilterChange({ platform: platform })
+    } else {
+      console.error('onFilterChange is not available')
     }
   }
 
   const handleCategoryClick = () => {
+    console.log('Category clicked:', categoryName, 'onFilterChange:', typeof onFilterChange)
     if (onFilterChange) {
+      console.log('Calling onFilterChange with category:', categoryName)
       onFilterChange({ category: categoryName })
+    } else {
+      console.error('onFilterChange is not available')
     }
   }
 
