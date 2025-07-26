@@ -120,27 +120,7 @@ function App() {
       setFiltersLoading(true)
       setActiveFilters(filters)
       
-      // Build query parameters
-      const params = new URLSearchParams()
-      
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== null && value !== undefined && value !== 'all') {
-          params.append(key, value)
-        }
-      })
-      
-      // Fetch filtered products
-      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
-      const data = await response.json()
-      
-      if (data.success) {
-        setFilteredProducts(data.data)
-      } else {
-        throw new Error('Failed to filter products')
-      }
-    } catch (error) {
-      console.error('Error filtering products:', error)
-      // Fallback to client-side filtering if API fails
+      // Skip API call and use client-side filtering directly for better reliability
       const filtered = products.filter(product => {
         if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
           return false
@@ -163,7 +143,8 @@ function App() {
         // Handle platform filtering
         if (filters.platform) {
           const categoryName = product.category?.name || product.account_type || ''
-          if (!categoryName.toLowerCase().includes(filters.platform.toLowerCase())) {
+          const platformMatch = categoryName.toLowerCase().includes(filters.platform.toLowerCase().replace(' accounts', ''))
+          if (!platformMatch) {
             return false
           }
         }
@@ -184,6 +165,8 @@ function App() {
         return true
       })
       setFilteredProducts(filtered)
+    } catch (error) {
+      console.error('Error filtering products:', error)
     } finally {
       setFiltersLoading(false)
     }
