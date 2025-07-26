@@ -7,6 +7,7 @@ import PlatformBreadcrumb from './components/PlatformBreadcrumb'
 import CategoryFilter from './components/CategoryFilter'
 import { Button } from "@/components/ui/button"
 import Footer from './components/Footer'
+import ProductCard from './components/ProductCard'
 import AdminPage from './pages/AdminPage'
 import './App.css'
 
