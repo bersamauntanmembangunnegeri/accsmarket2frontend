@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import CategorySection from './components/CategorySection'
+import ProductFilters from './components/ProductFilters'
 import Footer from './components/Footer'
 import AdminPage from './pages/AdminPage'
 import './App.css'
@@ -11,8 +12,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 function App() {
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filtersLoading, setFiltersLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [activeFilters, setActiveFilters] = useState({})
 
   useEffect(() => {
     fetchData()
@@ -44,6 +48,7 @@ function App() {
 
       if (productsData.success) {
         setProducts(productsData.data)
+        setFilteredProducts(productsData.data)
       } else {
         throw new Error('Failed to load products')
       }
@@ -104,19 +109,75 @@ function App() {
       
       setCategories(mockCategories)
       setProducts(mockProducts)
+      setFilteredProducts(mockProducts)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleFiltersChange = async (filters) => {
+    try {
+      setFiltersLoading(true)
+      setActiveFilters(filters)
+      
+      // Build query parameters
+      const params = new URLSearchParams()
+      
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== '' && value !== null && value !== undefined) {
+          params.append(key, value)
+        }
+      })
+      
+      // Fetch filtered products
+      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setFilteredProducts(data.data)
+      } else {
+        throw new Error('Failed to filter products')
+      }
+    } catch (error) {
+      console.error('Error filtering products:', error)
+      // Fallback to client-side filtering if API fails
+      const filtered = products.filter(product => {
+        if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
+          return false
+        }
+        if (filters.category_id && product.category_id !== parseInt(filters.category_id)) {
+          return false
+        }
+        if (filters.min_price && product.price < parseFloat(filters.min_price)) {
+          return false
+        }
+        if (filters.max_price && product.price > parseFloat(filters.max_price)) {
+          return false
+        }
+        if (filters.min_quantity && product.stock_quantity < parseInt(filters.min_quantity)) {
+          return false
+        }
+        if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
+          return false
+        }
+        return true
+      })
+      setFilteredProducts(filtered)
+    } finally {
+      setFiltersLoading(false)
     }
   }
 
   const getCategoryWithProducts = (category) => {
     // Get products for this category and its children
     const categoryIds = [category.id, ...(category.children || []).map(child => child.id)]
-    const categoryProducts = products.filter(product => 
+    const categoryProducts = filteredProducts.filter(product => 
       categoryIds.includes(product.category_id)
     )
     return categoryProducts
   }
+
+  const hasActiveFilters = Object.values(activeFilters).some(value => value !== '' && value !== null && value !== undefined)
 
   if (loading) {
     return (
@@ -170,9 +231,11 @@ function App() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white p-4 rounded-lg shadow-sm text-center">
                   <div className="text-2xl font-bold text-green-600">
-                    {products.length}+
+                    {filteredProducts.length}+
                   </div>
-                  <div className="text-sm text-gray-600">Products Available</div>
+                  <div className="text-sm text-gray-600">
+                    {hasActiveFilters ? 'Filtered Results' : 'Products Available'}
+                  </div>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow-sm text-center">
                   <div className="text-2xl font-bold text-blue-600">24/7</div>
@@ -187,6 +250,20 @@ function App() {
                   <div className="text-sm text-gray-600">Delivery</div>
                 </div>
               </div>
+
+              {/* Product Filters */}
+              <ProductFilters 
+                onFiltersChange={handleFiltersChange}
+                isLoading={filtersLoading}
+              />
+
+              {/* Loading indicator for filters */}
+              {filtersLoading && (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Filtering products...</p>
+                </div>
+              )}
 
               {/* Categories and Products */}
               <div className="space-y-8">
@@ -205,9 +282,14 @@ function App() {
               </div>
 
               {/* No Products Message */}
-              {categories.length === 0 && (
+              {filteredProducts.length === 0 && !filtersLoading && (
                 <div className="text-center py-12">
-                  <p className="text-gray-500 text-lg">No categories available at the moment.</p>
+                  <p className="text-gray-500 text-lg">
+                    {hasActiveFilters 
+                      ? 'No products match your current filters. Try adjusting your search criteria.'
+                      : 'No products available at the moment.'
+                    }
+                  </p>
                 </div>
               )}
             </main>
