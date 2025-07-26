@@ -5,6 +5,7 @@ import CategorySection from './components/CategorySection'
 import ProductFilters from './components/ProductFilters'
 import PlatformBreadcrumb from './components/PlatformBreadcrumb'
 import CategoryFilter from './components/CategoryFilter'
+import { Button } from "@/components/ui/button"
 import Footer from './components/Footer'
 import AdminPage from './pages/AdminPage'
 import './App.css'
