@@ -10,7 +10,7 @@ const ProductCard = ({ product, isLast, onFilterChange }) => {
     }).format(price)
   }
 
-  const truncateTitle = (title, maxLength = 200) => {
+  const truncateTitle = (title, maxLength = 100) => {
     if (title.length <= maxLength) return title
     return title.substring(0, maxLength) + '...'
   }
@@ -21,26 +21,32 @@ const ProductCard = ({ product, isLast, onFilterChange }) => {
     
     if (categoryName.includes('facebook')) {
       return (
-        <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-lg">
+        <div className="w-12 h-12 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-lg">
           f
         </div>
       )
     } else if (categoryName.includes('instagram')) {
       return (
-        <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded flex items-center justify-center text-white font-bold text-lg">
+        <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded flex items-center justify-center text-white font-bold text-lg">
           ig
         </div>
       )
     } else if (categoryName.includes('discord')) {
       return (
-        <div className="w-10 h-10 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-lg">
+        <div className="w-12 h-12 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-lg">
           D
+        </div>
+      )
+    } else if (categoryName.includes('game')) {
+      return (
+        <div className="w-12 h-12 bg-green-600 rounded flex items-center justify-center text-white font-bold text-lg">
+          G
         </div>
       )
     } else {
       return (
-        <div className="w-10 h-10 bg-gray-600 rounded flex items-center justify-center text-white font-bold text-lg">
-          G
+        <div className="w-12 h-12 bg-gray-600 rounded flex items-center justify-center text-white font-bold text-lg">
+          A
         </div>
       )
     }
@@ -68,84 +74,68 @@ const ProductCard = ({ product, isLast, onFilterChange }) => {
   const vendorName = getVendorName()
 
   return (
-    <div className={`p-4 ${!isLast ? 'border-b border-gray-200' : ''} hover:bg-gray-50 transition-colors`}>
-      <div className="flex items-start gap-4">
-        {/* Platform Icon */}
-        <div className="flex-shrink-0">
-          {getPlatformIcon()}
+    <div className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow p-4">
+      {/* Platform Icon */}
+      <div className="flex justify-center mb-4">
+        {getPlatformIcon()}
+      </div>
+
+      {/* Product Title/Description */}
+      <h3 className="text-sm font-medium text-gray-900 mb-3 leading-relaxed text-center">
+        {truncateTitle(product.title)}
+      </h3>
+
+      {/* Vendor Name - Clickable */}
+      <div className="mb-3 text-center">
+        <span className="text-xs text-gray-600">Vendor: </span>
+        <a 
+          onClick={handleVendorClick}
+          className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 hover:underline transition-colors"
+          title={`Filter by vendor: ${vendorName}`}
+        >
+          {vendorName}
+        </a>
+      </div>
+
+      {/* Stats Row */}
+      <div className="flex items-center justify-center gap-4 text-xs text-gray-600 mb-4">
+        {/* Time indicator */}
+        <div className="flex items-center gap-1">
+          <Clock className="w-3 h-3 text-green-600" />
+          <span className="text-green-600">48h</span>
         </div>
 
-        {/* Product Content */}
-        <div className="flex-1 min-w-0">
-          {/* Product Title/Description */}
-          <p className="text-sm text-gray-900 leading-relaxed mb-2">
-            {truncateTitle(product.title)}
-          </p>
-
-          {/* Vendor Name - Clickable */}
-          <div className="mb-2">
-            <span className="text-xs text-gray-600">Vendor: </span>
-            <a 
-              onClick={handleVendorClick}
-              className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 hover:underline transition-colors"
-              title={`Filter by vendor: ${vendorName}`}
-            >
-              {vendorName}
-            </a>
-          </div>
-
-          {/* Stats Row */}
-          <div className="flex items-center gap-4 text-xs text-gray-600">
-            {/* Time indicator */}
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-green-600" />
-              <span className="text-green-600">48h</span>
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center gap-1">
-              <Star className="w-3 h-3 text-yellow-400 fill-current" />
-              <span>{product.rating || '4.6'}</span>
-            </div>
-
-            {/* Additional stats */}
-            <div className="flex items-center gap-1">
-              <span className="text-blue-600">2.1%</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <span className="text-gray-400">0-10</span>
-            </div>
-          </div>
+        {/* Rating */}
+        <div className="flex items-center gap-1">
+          <Star className="w-3 h-3 text-yellow-400 fill-current" />
+          <span>{product.rating || '4.6'}</span>
         </div>
+      </div>
 
-        {/* Stock and Price Section */}
-        <div className="flex items-center gap-8 text-sm">
-          {/* Stock */}
-          <div className="text-center min-w-[80px]">
-            <div className="font-medium text-gray-900">
-              {product.stock_quantity} pcs.
-            </div>
-          </div>
-
-          {/* Price per piece */}
-          <div className="text-center min-w-[100px]">
-            <div className="text-xs text-gray-600 mb-1">Price per pc</div>
-            <div className="font-medium text-gray-900">
-              from {formatPrice(product.price)}
-            </div>
-          </div>
-
-          {/* Buy Button */}
-          <div className="min-w-[80px]">
-            <Button 
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-sm"
-              size="sm"
-            >
-              Buy
-            </Button>
-          </div>
+      {/* Stock */}
+      <div className="text-center mb-3">
+        <div className="text-sm font-medium text-gray-900">
+          {product.stock_quantity} pcs.
         </div>
+        <div className="text-xs text-gray-600">Available</div>
+      </div>
+
+      {/* Price */}
+      <div className="text-center mb-4">
+        <div className="text-xs text-gray-600 mb-1">Price per pc</div>
+        <div className="text-lg font-bold text-gray-900">
+          from {formatPrice(product.price)}
+        </div>
+      </div>
+
+      {/* Buy Button */}
+      <div className="text-center">
+        <Button 
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-sm w-full"
+          size="sm"
+        >
+          Buy Now
+        </Button>
       </div>
     </div>
   )
