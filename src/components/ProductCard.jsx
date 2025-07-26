@@ -86,7 +86,7 @@ const ProductCard = ({ product, isLast, onFilterChange }) => {
           <div className="mb-2">
             <span className="text-xs text-gray-600">Vendor: </span>
             <a 
-              href={`/?vendor=${encodeURIComponent(vendorName)}`}
+              onClick={handleVendorClick}
               className="text-xs text-blue-600 cursor-pointer hover:text-blue-800 hover:underline transition-colors"
               title={`Filter by vendor: ${vendorName}`}
             >

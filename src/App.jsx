@@ -21,8 +21,14 @@ function App() {
 
   useEffect(() => {
     fetchData()
-    // Check URL parameters on page load
-    checkUrlParameters()
+    // Check URL parameters on page load and on URL change
+    const handleUrlChange = () => {
+      checkUrlParameters()
+    }
+    window.addEventListener("popstate", handleUrlChange)
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange)
+    }
   }, [])
 
   const checkUrlParameters = () => {
@@ -174,6 +180,10 @@ function App() {
           params.append(key, value)
         }
       })
+      
+      // Update URL with new filters
+      const newUrl = `${window.location.pathname}?${params.toString()}`
+      window.history.pushState({ path: newUrl }, '', newUrl)
       
       // Try to fetch filtered products from API first
       try {
@@ -387,7 +397,7 @@ function App() {
                   {platforms.map(platform => (
                     <a
                       key={platform.id}
-                      href={`/?platform=${encodeURIComponent(platform.name)}`}
+                      onClick={() => handleQuickFilter({ platform: platform.name })}
                       className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                     >
                       {platform.name}
@@ -397,49 +407,49 @@ function App() {
                   {platforms.length === 0 && (
                     <>
                       <a
-                        href="/?platform=Facebook%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'Facebook Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Facebook Accounts
                       </a>
                       <a
-                        href="/?platform=Instagram%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'Instagram Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Instagram Accounts
                       </a>
                       <a
-                        href="/?platform=Game%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'Game Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Game Accounts
                       </a>
                       <a
-                        href="/?platform=Discord%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'Discord Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Discord Accounts
                       </a>
                       <a
-                        href="/?platform=Twitter%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'Twitter Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         Twitter Accounts
                       </a>
                       <a
-                        href="/?platform=YouTube%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'YouTube Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         YouTube Accounts
                       </a>
                       <a
-                        href="/?platform=TikTok%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'TikTok Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         TikTok Accounts
                       </a>
                       <a
-                        href="/?platform=LinkedIn%20Accounts"
+                        onClick={() => handleQuickFilter({ platform: 'LinkedIn Accounts' })}
                         className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-blue-300 font-medium"
                       >
                         LinkedIn Accounts

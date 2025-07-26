@@ -46,7 +46,7 @@ const CategorySection = ({ category, products, onFilterChange }) => {
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">
             <a 
-              href={`/?platform=${encodeURIComponent(platform)}`}
+              onClick={() => onFilterChange({ platform: platform })}
               className="cursor-pointer hover:text-blue-300 transition-colors border-b border-transparent hover:border-blue-300"
               title={`Filter by ${platform}`}
             >
@@ -56,7 +56,7 @@ const CategorySection = ({ category, products, onFilterChange }) => {
               <>
                 <span className="mx-2">-</span>
                 <a 
-                  href={`/?category=${encodeURIComponent(categoryName)}`}
+                  onClick={() => onFilterChange({ category: categoryName })}
                   className="cursor-pointer hover:text-green-300 transition-colors border-b border-transparent hover:border-green-300"
                   title={`Filter by ${categoryName}`}
                 >
