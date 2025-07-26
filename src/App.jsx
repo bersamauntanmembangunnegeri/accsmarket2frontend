@@ -120,7 +120,28 @@ function App() {
       setFiltersLoading(true)
       setActiveFilters(filters)
       
-      // Skip API call and use client-side filtering directly for better reliability
+      // Build query parameters
+      const params = new URLSearchParams()
+      
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== '' && value !== null && value !== undefined && value !== 'all') {
+          params.append(key, value)
+        }
+      })
+      
+      // Try to fetch filtered products from API
+      const response = await fetch(`${API_BASE_URL}/api/products?${params.toString()}`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setFilteredProducts(data.data)
+          return
+        }
+      }
+      
+      // If API fails, fall back to client-side filtering
+      console.warn('API filtering failed, using client-side filtering')
       const filtered = products.filter(product => {
         if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
           return false
@@ -167,6 +188,51 @@ function App() {
       setFilteredProducts(filtered)
     } catch (error) {
       console.error('Error filtering products:', error)
+      // Fallback to client-side filtering on any error
+      const filtered = products.filter(product => {
+        if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
+          return false
+        }
+        if (filters.category_id && filters.category_id !== 'all' && product.category_id !== parseInt(filters.category_id)) {
+          return false
+        }
+        if (filters.min_price && product.price < parseFloat(filters.min_price)) {
+          return false
+        }
+        if (filters.max_price && product.price > parseFloat(filters.max_price)) {
+          return false
+        }
+        if (filters.min_quantity && product.stock_quantity < parseInt(filters.min_quantity)) {
+          return false
+        }
+        if (filters.max_quantity && product.stock_quantity > parseInt(filters.max_quantity)) {
+          return false
+        }
+        // Handle platform filtering
+        if (filters.platform) {
+          const categoryName = product.category?.name || product.account_type || ''
+          const platformMatch = categoryName.toLowerCase().includes(filters.platform.toLowerCase().replace(' accounts', ''))
+          if (!platformMatch) {
+            return false
+          }
+        }
+        // Handle category filtering
+        if (filters.category) {
+          const categoryName = product.category?.name || product.account_type || ''
+          if (!categoryName.toLowerCase().includes(filters.category.toLowerCase())) {
+            return false
+          }
+        }
+        // Handle vendor filtering
+        if (filters.vendor) {
+          const vendorName = product.vendor?.vendor_name || product.vendor || ''
+          if (!vendorName.toLowerCase().includes(filters.vendor.toLowerCase())) {
+            return false
+          }
+        }
+        return true
+      })
+      setFilteredProducts(filtered)
     } finally {
       setFiltersLoading(false)
     }
