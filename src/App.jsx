@@ -56,6 +56,7 @@ function App() {
       setLoading(true)
       setError(null)
       
+      console.log('Fetching initial data...')
       // Fetch categories, products, and platforms from backend API
       const [categoriesResponse, productsResponse, platformsResponse] = await Promise.all([
         fetch(`${API_BASE_URL}/api/categories`),
@@ -70,6 +71,10 @@ function App() {
       const categoriesData = await categoriesResponse.json()
       const productsData = await productsResponse.json()
       const platformsData = await platformsResponse.json()
+
+      console.log('Categories data:', categoriesData)
+      console.log('Products data:', productsData)
+      console.log('Platforms data:', platformsData)
 
       if (categoriesData.success) {
         setCategories(categoriesData.data)
@@ -161,6 +166,7 @@ function App() {
       setPlatforms(mockPlatforms)
     } finally {
       setLoading(false)
+      console.log('Loading set to false')
     }
   }
 
