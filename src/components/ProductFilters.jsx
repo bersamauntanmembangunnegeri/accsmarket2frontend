@@ -25,10 +25,10 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
   
   const [filters, setFilters] = useState({
     keyword: '',
-    platform_id: '',
-    category_id: '',
-    subcategory_id: '',
-    vendor_id: '',
+    platform_id: 'all',
+    category_id: 'all',
+    subcategory_id: 'all',
+    vendor_id: 'all',
     min_price: '',
     max_price: '',
     min_quantity: '',
@@ -44,11 +44,11 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
 
   // Fetch subcategories when category changes
   useEffect(() => {
-    if (filters.category_id) {
+    if (filters.category_id && filters.category_id !== 'all') {
       fetchSubcategories(filters.category_id)
     } else {
       setSubcategories([])
-      setFilters(prev => ({ ...prev, subcategory_id: '' }))
+      setFilters(prev => ({ ...prev, subcategory_id: 'all' }))
     }
   }, [filters.category_id])
 
@@ -117,10 +117,10 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
   const clearFilters = () => {
     const clearedFilters = {
       keyword: '',
-      platform_id: '',
-      category_id: '',
-      subcategory_id: '',
-      vendor_id: '',
+      platform_id: 'all',
+      category_id: 'all',
+      subcategory_id: 'all',
+      vendor_id: 'all',
       min_price: '',
       max_price: '',
       min_quantity: '',
@@ -130,7 +130,12 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
     onFiltersChange(clearedFilters)
   }
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== '')
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
+    if (key === 'keyword' || key.includes('price') || key.includes('quantity')) {
+      return value !== ''
+    }
+    return value !== 'all'
+  })
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
@@ -173,7 +178,7 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
                   <SelectValue placeholder="All platforms" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All platforms</SelectItem>
+                  <SelectItem value="all">All platforms</SelectItem>
                   {platforms.map((platform) => (
                     <SelectItem key={platform.platform_id} value={platform.platform_id.toString()}>
                       {platform.platform_name}
@@ -191,7 +196,7 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
                   <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All categories</SelectItem>
+                  <SelectItem value="all">All categories</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
                       {category.name}
@@ -207,13 +212,13 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
               <Select 
                 value={filters.subcategory_id} 
                 onValueChange={(value) => handleFilterChange('subcategory_id', value)}
-                disabled={!filters.category_id}
+                disabled={!filters.category_id || filters.category_id === 'all'}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All subcategories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All subcategories</SelectItem>
+                  <SelectItem value="all">All subcategories</SelectItem>
                   {subcategories.map((subcategory) => (
                     <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
                       {subcategory.name}
@@ -231,7 +236,7 @@ const ProductFilters = ({ onFiltersChange, isLoading }) => {
                   <SelectValue placeholder="All vendors" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All vendors</SelectItem>
+                  <SelectItem value="all">All vendors</SelectItem>
                   {vendors.map((vendor) => (
                     <SelectItem key={vendor.vendor_id} value={vendor.vendor_id.toString()}>
                       {vendor.vendor_name}

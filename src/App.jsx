@@ -124,7 +124,7 @@ function App() {
       const params = new URLSearchParams()
       
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== '' && value !== null && value !== undefined) {
+        if (value !== '' && value !== null && value !== undefined && value !== 'all') {
           params.append(key, value)
         }
       })
@@ -145,7 +145,7 @@ function App() {
         if (filters.keyword && !product.title.toLowerCase().includes(filters.keyword.toLowerCase())) {
           return false
         }
-        if (filters.category_id && product.category_id !== parseInt(filters.category_id)) {
+        if (filters.category_id && filters.category_id !== 'all' && product.category_id !== parseInt(filters.category_id)) {
           return false
         }
         if (filters.min_price && product.price < parseFloat(filters.min_price)) {
@@ -177,7 +177,12 @@ function App() {
     return categoryProducts
   }
 
-  const hasActiveFilters = Object.values(activeFilters).some(value => value !== '' && value !== null && value !== undefined)
+  const hasActiveFilters = Object.entries(activeFilters).some(([key, value]) => {
+    if (key === 'keyword' || key.includes('price') || key.includes('quantity')) {
+      return value !== '' && value !== null && value !== undefined
+    }
+    return value !== 'all' && value !== '' && value !== null && value !== undefined
+  })
 
   if (loading) {
     return (
