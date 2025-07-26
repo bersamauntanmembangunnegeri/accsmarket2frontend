@@ -192,25 +192,7 @@ function App() {
       window.history.pushState({ path: newUrl }, '', newUrl)
       console.log('URL updated to:', newUrl)
       
-      // Try to fetch filtered products from API first
-      try {
-        const apiUrl = `${API_BASE_URL}/api/products?${params.toString()}`
-        console.log('Fetching from API:', apiUrl)
-        const response = await fetch(apiUrl)
-        
-        if (response.ok) {
-          const data = await response.json()
-          if (data.success) {
-            console.log('API filtering successful, products:', data.data)
-            setFilteredProducts(data.data)
-            return
-          }
-        }
-      } catch (apiError) {
-        console.warn('API filtering failed:', apiError)
-      }
-      
-      // If API fails, fall back to client-side filtering
+      // Use client-side filtering only
       console.warn('Using client-side filtering')
       const filtered = products.filter(product => {
         console.log('Checking product:', product.title)
