@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import CategorySection from './components/CategorySection'
 import ProductFilters from './components/ProductFilters'
-import CategoryBreadcrumb from './components/CategoryBreadcrumb'
-import SubcategoryFilter from './components/SubcategoryFilter'
+import PlatformBreadcrumb from './components/PlatformBreadcrumb'
+import CategoryFilter from './components/CategoryFilter'
 import Footer from './components/Footer'
 import AdminPage from './pages/AdminPage'
 import './App.css'
@@ -16,6 +16,8 @@ function App() {
   const [products, setProducts] = useState([])
   const [platforms, setPlatforms] = useState([])
   const [filteredProducts, setFilteredProducts] = useState([])
+  const [selectedPlatform, setSelectedPlatform] = useState(null)
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [loading, setLoading] = useState(true)
   const [filtersLoading, setFiltersLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -304,6 +306,10 @@ function App() {
     let newFilters = { ...activeFilters }
     
     if (filterType.platform) {
+      // Set selected platform and clear category
+      setSelectedPlatform(filterType.platform)
+      setSelectedCategory(null)
+      
       // Map platform name to category name
       const platformToCategory = {
         'Facebook Accounts': 'Facebook Accounts',
@@ -325,6 +331,40 @@ function App() {
     
     console.log('New filters (from quick filter):', newFilters)
     handleFiltersChange(newFilters)
+  }
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category)
+    const newFilters = {
+      ...activeFilters,
+      category_id: category.category_id
+    }
+    handleFiltersChange(newFilters)
+  }
+
+  const handleNavigate = (type, data) => {
+    if (type === 'home') {
+      setSelectedPlatform(null)
+      setSelectedCategory(null)
+      setActiveFilters({})
+      setFilteredProducts(products)
+      window.history.pushState({ path: '/' }, '', '/')
+    } else if (type === 'platform') {
+      setSelectedPlatform(data)
+      setSelectedCategory(null)
+      handleQuickFilter({ platform: data })
+    } else if (type === 'category') {
+      setSelectedCategory(data)
+      handleCategorySelect(data)
+    }
+  }
+
+  const handleClearFilters = () => {
+    setSelectedPlatform(null)
+    setSelectedCategory(null)
+    setActiveFilters({})
+    setFilteredProducts(products)
+    window.history.pushState({ path: '/' }, '', '/')
   }
 
   const getCategoryWithProducts = (category) => {
@@ -434,23 +474,20 @@ function App() {
               {/* Product Filters */}
               <ProductFilters onFiltersChange={handleFiltersChange} isLoading={filtersLoading} />
 
-              {/* Category Breadcrumb */}
-              {(activeFilters.category || activeFilters.subcategory) && (
-                <CategoryBreadcrumb 
-                  category={activeFilters.category ? { name: activeFilters.category } : null}
-                  subcategory={activeFilters.subcategory ? { name: activeFilters.subcategory } : null}
-                  onFilterChange={handleQuickFilter}
-                />
-              )}
+              {/* Platform Breadcrumb */}
+              <PlatformBreadcrumb 
+                selectedPlatform={selectedPlatform}
+                selectedCategory={selectedCategory}
+                onNavigate={handleNavigate}
+              />
 
-              {/* Subcategory Filter */}
-              {activeFilters.category && (
-                <SubcategoryFilter 
-                  category={categories.find(cat => cat.name === activeFilters.category)}
-                  activeSubcategory={activeFilters.subcategory}
-                  onFilterChange={handleQuickFilter}
-                />
-              )}
+              {/* Category Filter */}
+              <CategoryFilter 
+                selectedPlatform={selectedPlatform}
+                selectedCategory={selectedCategory}
+                onCategorySelect={handleCategorySelect}
+                onClearFilters={handleClearFilters}
+              />
 
               {/* Product Listing */}
               <div className="space-y-6">
