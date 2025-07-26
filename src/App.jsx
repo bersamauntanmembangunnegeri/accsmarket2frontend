@@ -353,7 +353,7 @@ function App() {
               {/* Stats Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow-sm p-6 text-center border">
-                  <p className="text-green-600 text-3xl font-bold">2+</p>
+                  <p className="text-green-600 text-3xl font-bold">{products.length}+</p>
                   <p className="text-gray-500">Products Available</p>
                 </div>
                 <div className="bg-white rounded-lg shadow-sm p-6 text-center border">
@@ -420,19 +420,17 @@ function App() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id} product={product} onFilterChange={handleQuickFilter} />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-10">
-                    <p className="text-gray-500">No products found matching your criteria.</p>
-                  </div>
+                  <p className="text-gray-600 col-span-full text-center">No products found matching your criteria.</p>
                 )}
               </div>
             </main>
-          } />
+          }
+          />
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
-
         <Footer />
       </div>
     </Router>
